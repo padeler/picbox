@@ -68,34 +68,16 @@ pcbPositionZ = 2.5;
 
 //-----------------------------------------------------------------TOP PARAMETERS
 // lid holes dimensions
-connectorRoundR = 2.54/2;
-connectorWide = 2.54*3;
+tftRoundR = 2.54/2;
+tftWide = 46;
 
-upperConnectorWidth = 44.704 + 2.54*2;
-upperConnectorXPos = 18.796 - 2.54;
-upperConnectorYPos = 50.8 - 2.54*2;
-lowerConnectorWidth = 35.56 + 2.54*2;
-lowerConnectorXPos = 27.94 - 2.54;
-lowerConnectorYPos = 2.54 - 2.54;
-
-icspConnectorWidth = 5.08 + 2.54*2;
-icspConnectorWide = 2.54 + 2.54*2;
-icspConnectorXPos = 63.64 - 2.54;
-icspConnectorYPos = 30.43 + 2.54;
-
-ledHoleWidth = 2.54 + 1.27*2;
-ledHoleWide = 11.5 + 1.27*2;
-ledHoleXPos = 4.45;
-ledHoleYPos = 22 ;
-
-buttonSize = 4;
-buttonXPos = 6.15;
-buttonYPos = 50;
-buttonBaseHeight = 2;
-buttonBaseR = buttonSize/2 + 0.25 + layerWidth*3;
+tftWidth = 64. + 2.54*2;
+tftXPos = 5;
+tftYPos = 0;
 
 
-// internals (battery,board etc) 
+
+//------------------------------  internals (battery,board etc) 
 
 // 18650 cell dims
 batteryRad = 19/2;

@@ -87,198 +87,158 @@ module top(){
                     translate([0, usbHolePosition, -1.3])
                     cube([10, usbWide, usbHeight], center=true);
                     
-                    // Cut connectors holes
-                    // upper
-                    translate([upperConnectorXPos + upperConnectorWidth/2,
-                            upperConnectorYPos + connectorWide/2,
+                    // Cut screen hole
+                    translate([tftXPos + tftWidth/2,
+                            tftYPos + tftWide/2,
                             -17])
                     linear_extrude(height = 5, convexity = 10)
                     minkowski()
                     {									
-                        square([upperConnectorWidth - connectorRoundR*2,
-                        connectorWide - connectorRoundR*2], center = true);
-                        circle(connectorRoundR);
+                        square([tftWidth - tftRoundR*2,
+                        tftWide - tftRoundR*2], center = true);
+                        circle(tftRoundR);
                     }
-                    // lower
-                    translate([lowerConnectorXPos + lowerConnectorWidth/2,
-                            lowerConnectorYPos + connectorWide/2,
-                            -17])
-                    linear_extrude(height = 5, convexity = 10)
-                    minkowski()
-                    {									
-                        square([lowerConnectorWidth - connectorRoundR*2,
-                        connectorWide - connectorRoundR*2], center = true);
-                        circle(connectorRoundR);
-                    }
-                    // icsp
-                    translate([icspConnectorXPos + icspConnectorWide/2,
-                            icspConnectorYPos - icspConnectorWidth/2,
-                            -17])
-                    linear_extrude(height = 5, convexity = 10)
-                    minkowski()
-                    {									
-                        square([icspConnectorWide - connectorRoundR*2,
-                        icspConnectorWidth - connectorRoundR*2], center = true);
-                        circle(connectorRoundR);
-                    }
-                    // led hole
-                    translate([ledHoleXPos ,
-                            ledHoleYPos ,
-                            -17])
-                    linear_extrude(height = 5, convexity = 10)
-                    minkowski()
-                    {									
-                        square([ledHoleWidth - connectorRoundR*2,
-                        ledHoleWide - connectorRoundR*2], center = true);
-                        circle(connectorRoundR);
-                    }
-                    // button
-                    translate([buttonXPos, buttonYPos, -17])
-                    cylinder(h = 5, r = buttonSize/2 + 0.5);
-                    // buttonFrame
-                    translate([buttonXPos, buttonYPos, -(height - floorHeight -pcbPositionZ-pcbHeight)])
-                    buttonFrame();
                 }
             }
         }
     }
 
-
-    //------------------------------------------------------------------------- ADD PCB LEGS
-    // Rotate due to panel upside down
-    mirror([0, 1 , 0])
-
-    // Translate to pcbPositionX	
-    translate([-pcbPositionX, -pcbWide/2, 0])
-
-
-    difference()
-    {
-                                                                            // ADD
-        union()
-        {
-            // Add pcb legs
-            for(i=[ [15.24, 50.8, 0],
-                    [66.04, 35.56, 0],
-                    [66.04, 7.62, 0] ])
-            {
-                    translate(i)
-                    top_pcbLeg();
-            }
-            translate([13.97, 2.54, 0])
-            cylinder(h = height - floorHeight - pcbPositionZ - pcbHeight, r = 4.5/2);
-
-            // Add connectors walls
-            // upper
-            translate([upperConnectorXPos + upperConnectorWidth/2,
-                    upperConnectorYPos + connectorWide/2,
-                    0])
-            linear_extrude(height = floorHeight+5, convexity = 10)
-            minkowski()
-            {									
-                square([upperConnectorWidth - connectorRoundR*2,
-                connectorWide - connectorRoundR*2], center = true);
-                circle(connectorRoundR + layerWidth*3);
-            }
-            // lower
-            translate([lowerConnectorXPos + lowerConnectorWidth/2,
-                    lowerConnectorYPos + connectorWide/2,
-                    0])
-            linear_extrude(height = floorHeight+5, convexity = 10)
-            minkowski()
-            {									
-                square([lowerConnectorWidth - connectorRoundR*2,
-                connectorWide - connectorRoundR*2], center = true);
-                circle(connectorRoundR+ layerWidth*3);
-            }
-            // icsp
-            translate([icspConnectorXPos + icspConnectorWide/2,
-                    icspConnectorYPos - icspConnectorWidth/2,
-                    0])
-            linear_extrude(height = floorHeight+5, convexity = 10)
-            minkowski()
-            {									
-                square([icspConnectorWide - connectorRoundR*2,
-                icspConnectorWidth - connectorRoundR*2], center = true);
-                circle(connectorRoundR+ layerWidth*3);
-            }
-            // ledHole
-            translate([ledHoleXPos,
-                    ledHoleYPos,
-                    0])
-            linear_extrude(height = floorHeight+5, convexity = 10)
-            minkowski()
-            {									
-                square([ledHoleWidth - connectorRoundR*2,
-                ledHoleWide - connectorRoundR*2], center = true);
-                circle(connectorRoundR+ layerWidth*3);	
-            }
-            // button
-            translate([buttonXPos, buttonYPos, 0])
-
-            cylinder(h = height - floorHeight - pcbPositionZ - pcbHeight - 3 - buttonBaseHeight - layerHeight*2,
-                    r = buttonBaseR);
-
-        }
-                                                                            // SUBSTRACT
-        union()
-        {
-            // Cut connectors holes
-            // upper
-            translate([0, 0, height - floorHeight -pcbPositionZ-pcbHeight])
-            {
-                translate([upperConnectorXPos + upperConnectorWidth/2,
-                        upperConnectorYPos + connectorWide/2,
-                        -17])
-                linear_extrude(height = 25, convexity = 10)
-                minkowski()
-                {									
-                    square([upperConnectorWidth - connectorRoundR*2,
-                    connectorWide - connectorRoundR*2], center = true);
-                    circle(connectorRoundR);
-                }
-                // lower
-                translate([lowerConnectorXPos + lowerConnectorWidth/2,
-                        lowerConnectorYPos + connectorWide/2,
-                        -17])
-                linear_extrude(height = 25, convexity = 10)
-                minkowski()
-                {									
-                    square([lowerConnectorWidth - connectorRoundR*2,
-                    connectorWide - connectorRoundR*2], center = true);
-                    circle(connectorRoundR);
-                }
-                // icsp
-                translate([icspConnectorXPos + icspConnectorWide/2,
-                        icspConnectorYPos - icspConnectorWidth/2,
-                        -17])
-                linear_extrude(height = 25, convexity = 10)
-                minkowski()
-                {									
-                    square([icspConnectorWide - connectorRoundR*2,
-                    icspConnectorWidth - connectorRoundR*2], center = true);
-                    circle(connectorRoundR);
-                }
-                // ledHole
-                translate([ledHoleXPos ,
-                        ledHoleYPos,
-                        -17])
-                linear_extrude(height = 25, convexity = 10)
-                minkowski()
-                {									
-                    square([ledHoleWidth - connectorRoundR*2,
-                    ledHoleWide - connectorRoundR*2], center = true);
-                    circle(connectorRoundR);	
-                }
-                // button
-                translate([buttonXPos, buttonYPos, -17])
-                cylinder(h = 15, r = buttonSize/2 + 0.25);
-            }
-            // buttonFrame
-            translate([buttonXPos, buttonYPos, 0])
-            buttonFrame();
-        }
-    }
 }
+//    //------------------------------------------------------------------------- ADD PCB LEGS
+//    // Rotate due to panel upside down
+//    mirror([0, 1 , 0])
+//
+//    // Translate to pcbPositionX	
+//    translate([-pcbPositionX, -pcbWide/2, 0])
+//
+//
+//    difference()
+//    {
+//                                                                            // ADD
+//        union()
+//        {
+//            // Add pcb legs
+//            for(i=[ [15.24, 50.8, 0],
+//                    [66.04, 35.56, 0],
+//                    [66.04, 7.62, 0] ])
+//            {
+//                    translate(i)
+//                    top_pcbLeg();
+//            }
+//            translate([13.97, 2.54, 0])
+//            cylinder(h = height - floorHeight - pcbPositionZ - pcbHeight, r = 4.5/2);
+//
+//            // Add connectors walls
+//            // upper
+//            translate([upperConnectorXPos + upperConnectorWidth/2,
+//                    upperConnectorYPos + connectorWide/2,
+//                    0])
+//            linear_extrude(height = floorHeight+5, convexity = 10)
+//            minkowski()
+//            {									
+//                square([upperConnectorWidth - connectorRoundR*2,
+//                connectorWide - connectorRoundR*2], center = true);
+//                circle(connectorRoundR + layerWidth*3);
+//            }
+//            // lower
+//            translate([lowerConnectorXPos + lowerConnectorWidth/2,
+//                    lowerConnectorYPos + connectorWide/2,
+//                    0])
+//            linear_extrude(height = floorHeight+5, convexity = 10)
+//            minkowski()
+//            {									
+//                square([lowerConnectorWidth - connectorRoundR*2,
+//                connectorWide - connectorRoundR*2], center = true);
+//                circle(connectorRoundR+ layerWidth*3);
+//            }
+//            // icsp
+//            translate([icspConnectorXPos + icspConnectorWide/2,
+//                    icspConnectorYPos - icspConnectorWidth/2,
+//                    0])
+//            linear_extrude(height = floorHeight+5, convexity = 10)
+//            minkowski()
+//            {									
+//                square([icspConnectorWide - connectorRoundR*2,
+//                icspConnectorWidth - connectorRoundR*2], center = true);
+//                circle(connectorRoundR+ layerWidth*3);
+//            }
+//            // ledHole
+//            translate([ledHoleXPos,
+//                    ledHoleYPos,
+//                    0])
+//            linear_extrude(height = floorHeight+5, convexity = 10)
+//            minkowski()
+//            {									
+//                square([ledHoleWidth - connectorRoundR*2,
+//                ledHoleWide - connectorRoundR*2], center = true);
+//                circle(connectorRoundR+ layerWidth*3);	
+//            }
+//            // button
+//            translate([buttonXPos, buttonYPos, 0])
+//
+//            cylinder(h = height - floorHeight - pcbPositionZ - pcbHeight - 3 - buttonBaseHeight - layerHeight*2,
+//                    r = buttonBaseR);
+//
+//        }
+//                                                                            // SUBSTRACT
+//        union()
+//        {
+//            // Cut connectors holes
+//            // upper
+//            translate([0, 0, height - floorHeight -pcbPositionZ-pcbHeight])
+//            {
+//                translate([upperConnectorXPos + upperConnectorWidth/2,
+//                        upperConnectorYPos + connectorWide/2,
+//                        -17])
+//                linear_extrude(height = 25, convexity = 10)
+//                minkowski()
+//                {									
+//                    square([upperConnectorWidth - connectorRoundR*2,
+//                    connectorWide - connectorRoundR*2], center = true);
+//                    circle(connectorRoundR);
+//                }
+//                // lower
+//                translate([lowerConnectorXPos + lowerConnectorWidth/2,
+//                        lowerConnectorYPos + connectorWide/2,
+//                        -17])
+//                linear_extrude(height = 25, convexity = 10)
+//                minkowski()
+//                {									
+//                    square([lowerConnectorWidth - connectorRoundR*2,
+//                    connectorWide - connectorRoundR*2], center = true);
+//                    circle(connectorRoundR);
+//                }
+//                // icsp
+//                translate([icspConnectorXPos + icspConnectorWide/2,
+//                        icspConnectorYPos - icspConnectorWidth/2,
+//                        -17])
+//                linear_extrude(height = 25, convexity = 10)
+//                minkowski()
+//                {									
+//                    square([icspConnectorWide - connectorRoundR*2,
+//                    icspConnectorWidth - connectorRoundR*2], center = true);
+//                    circle(connectorRoundR);
+//                }
+//                // ledHole
+//                translate([ledHoleXPos ,
+//                        ledHoleYPos,
+//                        -17])
+//                linear_extrude(height = 25, convexity = 10)
+//                minkowski()
+//                {									
+//                    square([ledHoleWidth - connectorRoundR*2,
+//                    ledHoleWide - connectorRoundR*2], center = true);
+//                    circle(connectorRoundR);	
+//                }
+//                // button
+//                translate([buttonXPos, buttonYPos, -17])
+//                cylinder(h = 15, r = buttonSize/2 + 0.25);
+//            }
+//            // buttonFrame
+//            translate([buttonXPos, buttonYPos, 0])
+//            buttonFrame();
+//        }
+//    }
+//}
 
 //top();

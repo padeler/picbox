@@ -113,38 +113,38 @@ module bottom(){
     }
     //------------------------------------------------------------------------- ADD PCB LEGS
     // Translate to pcbPositionX	
-    translate([-pcbPositionX, -pcbWide/2, 0])
-
-    difference()
-    {
-                                                                            // ADD
-        union()
-        {
-            // Add pcb legs
-            for(i=[ [13.97, 2.54, 0], 				
-                    [15.24, 50.8, 0],
-                    [66.04, 35.56, 0],
-                    [66.04, 7.62, 0] ])
-            {
-                    translate(i)
-                    bottom_pcbLeg();
-            }
-            // Add pcb holders
-            for(i=[ [13.97, 2.54, 0],
-                    [15.24, 50.8, 0],
-                    [66.04, 35.56, 0],
-                    [66.04, 7.62, 0] ])
-            {
-                translate(i)
-                cylinder(h=floorHeight+pcbPositionZ+1.5, r=1.2);
-            }
-        }
-                                                                            // SUBSTRACT
-        union()
-        {
-            //
-        }
-    }
+//    translate([-pcbPositionX, -pcbWide/2, 0])
+//
+//    difference()
+//    {
+//                                                                            // ADD
+//        union()
+//        {
+//            // Add pcb legs
+//            for(i=[ [13.97, 2.54, 0], 				
+//                    [15.24, 50.8, 0],
+//                    [66.04, 35.56, 0],
+//                    [66.04, 7.62, 0] ])
+//            {
+//                    translate(i)
+//                    bottom_pcbLeg();
+//            }
+//            // Add pcb holders
+//            for(i=[ [13.97, 2.54, 0],
+//                    [15.24, 50.8, 0],
+//                    [66.04, 35.56, 0],
+//                    [66.04, 7.62, 0] ])
+//            {
+//                translate(i)
+//                cylinder(h=floorHeight+pcbPositionZ+1.5, r=1.2);
+//            }
+//        }
+//                                                                            // SUBSTRACT
+//        union()
+//        {
+//            //
+//        }
+//    }
 }
 
 //bottom();
