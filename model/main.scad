@@ -6,10 +6,10 @@ include <bottom.scad>
 
 //rotate([180,0,0])
 
-bottom();
-
-mirror([0,0,1])
-translate([0,0,-2*height])
 top();
+
+rotate([0,180,0])
+translate([0,0,-height-0.4])
+bottom();
 
 foo_internals1();

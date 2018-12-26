@@ -13,7 +13,7 @@ include <common.scad>
 module bottom(){
     difference()
     {
-                                                                            // ADD
+        // ADD
         union()
         {
             // Add Base
@@ -24,36 +24,39 @@ module bottom(){
                 circle(roundR);
             }
         }
-                                                                            // SUBSTRACT
+        // SUBSTRACT
         union()
         {
             // Lift floor height
+            // Cut Base hole
             translate([0, 0, floorHeight])
+            linear_extrude(height = height/2, convexity = 10)
+            minkowski()
             {
-                // Cut Base hole
-                linear_extrude(height = height/2, convexity = 10)
-                minkowski()
-                {
-                    square([width, wide], center = true);
-                    circle(roundR - pillarSize);
-                }
-                // Cut upper block lock
-                difference() {
-                    translate([0, 0, height/2 - floorHeight - blockLockSize]) {
-                        cylinder(h = blockLockSize+gap, r=width);
-                    }
-                    translate([0, 0, height/2 - floorHeight - blockLockSize - gap*2]) {
-                        linear_extrude(height = blockLockSize+gap*4, convexity = 10)
-                        minkowski() {
-                            square([width, wide], center=true);
-                            circle(roundR - layerWidth*4);
-                        }
+                square([width, wide], center = true);
+                circle(roundR - pillarSize);
+            }
+            // Cut upper block lock
+            difference() {
+                translate([0, 0, height/2 - blockLockSize ]) {
+                    linear_extrude(height = blockLockSize+2, convexity = 10)
+                    minkowski() {
+                        square([width+1, wide+1], center=true);
+                        circle(roundR);
                     }
                 }
+                translate([0, 0, height/2 - blockLockSize ]) {
+                    linear_extrude(height = blockLockSize+2, convexity = 10)
+                    minkowski() {
+                        square([width, wide], center=true);
+                        circle(roundR - layerWidth*4);
+                    }
+                }
+            }
                 // Cut x panels 
                 for (i = [0 : 180 : 180])				
                 rotate([0, 0, i])
-                translate([width/2 + roundR - pillarSize/2 - layerWidth*7, 0, 0])
+                translate([width/2 + roundR - pillarSize/2 - layerWidth*7, 0, floorHeight])
                 {
                     // Cut X panel hole
                     translate([0, 0, height/2])
@@ -90,7 +93,7 @@ module bottom(){
                 // Cut Y panels 
                 for (i = [90 : 180 : 270])
                 rotate([0, 0, i])
-                translate([wide/2 + roundR - pillarSize/2 - layerWidth*7, 0, 0])
+                translate([wide/2 + roundR - pillarSize/2 - layerWidth*7, 0, floorHeight])
                 {
                     // Cut Y panel hole
                     translate([0, 0, height/2])
@@ -98,53 +101,34 @@ module bottom(){
                 }
                 
                 // Cut USB and Power holes
-                // translate to pcb position
-                translate([-pcbPositionX, -pcbWide/2, pcbPositionZ + pcbHeight])
-                {
-                    // cut power hole
-                    translate([0, powerJackPosition, (powerJackHeight-2)/2])
-                    cube([10, powerJackWide, powerJackHeight], center=true);
-                    // cut usb hole
-                    translate([0, usbHolePosition, 1.3])
-                    cube([10, usbWide, usbHeight], center=true);
-                }
-            }
+                mirror(0,1,0)
+                translate([powerHolePosX, boxLength/2, height/2 - powerHoleBottomHeight ])
+                cube([powerHoleWidth, 20,  powerHoleBottomHeight+2]);
+
         }
     }
-    //------------------------------------------------------------------------- ADD PCB LEGS
-    // Translate to pcbPositionX	
-//    translate([-pcbPositionX, -pcbWide/2, 0])
-//
-//    difference()
-//    {
-//                                                                            // ADD
-//        union()
-//        {
-//            // Add pcb legs
-//            for(i=[ [13.97, 2.54, 0], 				
-//                    [15.24, 50.8, 0],
-//                    [66.04, 35.56, 0],
-//                    [66.04, 7.62, 0] ])
-//            {
-//                    translate(i)
-//                    bottom_pcbLeg();
-//            }
-//            // Add pcb holders
-//            for(i=[ [13.97, 2.54, 0],
-//                    [15.24, 50.8, 0],
-//                    [66.04, 35.56, 0],
-//                    [66.04, 7.62, 0] ])
-//            {
-//                translate(i)
-//                cylinder(h=floorHeight+pcbPositionZ+1.5, r=1.2);
-//            }
-//        }
-//                                                                            // SUBSTRACT
-//        union()
-//        {
-//            //
-//        }
-//    }
+    
+    translate([-boxWidth/2, -boxLength/2+5, floorHeight])
+    batSep();
+    translate([-boxWidth/2 + batteryD+4*layerWidth, -boxLength/2+5, floorHeight])
+    batSep();
+    
+    translate([boxWidth/2 - batteryD-2*layerWidth,-boxLength/2+5,floorHeight])
+    batSep();
+    translate([boxWidth/2+2*layerWidth,-boxLength/2+5, floorHeight])
+    batSep();
+    
+    translate([boxWidth/2 - 2 ,-boxLength/2 + 2,floorHeight])
+    pcbLeg();
+
+    translate([-boxWidth/2+2,-boxLength/2+2,floorHeight])
+    pcbLeg();
+
+    translate([boxWidth/2 - 2 ,boxLength/2 - 2,floorHeight])
+    pcbLeg();
+
+    translate([-boxWidth/2+2,boxLength/2-2,floorHeight])
+    pcbLeg();
 }
 
 //bottom();

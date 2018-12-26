@@ -6,8 +6,50 @@
 //  or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 
+//------------------------------  internals (battery,board etc) 
+
+tftRoundR = 2.54/2;
+
+tftWide = 46;
+tftLength = 60;
+
+tftWideFull = 50;
+tftLengthFull = 70;
+
+tftPadBottom = 7; 
+tftPadTop = tftLengthFull - tftLength - tftPadBottom;
+
+tftSlotHeight = 0.5;
+
+// 18650 cell dims
+batteryD  = 18.2;
+batteryRad = batteryD/2;
+batteryLength = 65;
+
+// tft+pcb+arduino assemply
+boxLength=80;
+boxWidth=55;
+boxHeight=19; // total height of the assemply
+tftHeight=7.2; 
+
+pcbLegHeight = batteryD + boxHeight +tftSlotHeight - tftHeight ;
+
+boxPositionX = 0;
+boxPositionY = 10; // offset towards top
+
+powerHoleHeight = 5 + 13.5;
+powerHoleWidth = 19;
+powerHolePosZ = tftHeight-tftSlotHeight;
+powerHolePosX = -52.6/2 + 22;
+// NOTE: a hole with height 4.5 is needed  on the bottom side
+powerHoleBottomHeight = 4.5;
+
+
+
 //------------------------------------------------------------------------- SHARED PARAMETERS
 $fn=100; // resolution
+
+
 
 
 circleD = 21; // round corner circle diameter
@@ -21,12 +63,10 @@ screwExt = 3.4; // screw through hole diameter
 verConnectionHoleR = 1.2; // screw thread hole radius
 screwHead = 6; // screw head hole diameter
 
-gap = layerHeight/2;
+floorHeight = 2.0; // 6*0.25 layer + 0.3 first layer
 
-floorHeight = 1.8; // 6*0.25 layer + 0.3 first layer
-
-height = 20.6; // case height
-innerHeight = height - floorHeight*2;
+height = batteryD+boxHeight+2*floorHeight; // case height
+innerHeight = batteryD+boxHeight;
 
 pillarSize = roundR-0.01; // corner pillar size
 
@@ -34,8 +74,8 @@ pillarSize = roundR-0.01; // corner pillar size
 // these are NOT case dimensions
 // to calculate external case dimesions add 2 * roundR
 // 55.3 + (2*10.5) = 76.3
-width = 70.3;
-wide = 80.3;
+width = boxWidth ;
+wide = boxLength;
 
 blockLockSize = 2; // middle connection lock size
 
@@ -51,10 +91,6 @@ echo("width", width + roundR*2); // total width
 echo("wide", wide + roundR*2); // total wide
 
 
-// LEONARDO PCB dimensions
-pcbWide=53.3;
-pcbLenght=68.58;
-pcbHeight=1.64;
 usbHolePosition=38.1;
 usbHeight=7.2 + 2;
 usbWide=10.5 + 2;
@@ -62,82 +98,45 @@ powerJackPosition=7.62;
 powerJackWide=8.9 +2;
 powerJackHeight=10.8 +2;
 
-pcbPositionX = width/2 + roundR - layerWidth*7 - gap*4;
-pcbPositionZ = 2.5;
-
-
-//-----------------------------------------------------------------TOP PARAMETERS
-// lid holes dimensions
-tftRoundR = 2.54/2;
-tftWide = 46;
-
-tftWidth = 64. + 2.54*2;
-tftXPos = 5;
-tftYPos = 0;
-
-
-
-//------------------------------  internals (battery,board etc) 
-
-// 18650 cell dims
-batteryRad = 19/2;
-batteryHeight = 65;
-
-// tft+pcb+arduino assemply
-boxLength=80;
-boxWidth=55;
-boxHeight=18; // total height of the assemply
-tftHeight=7; 
 
 
 
 
 //------------------------------------------------------------------COMMON MODULES
-module bottom_pcbLeg() {		
-	translate([0, 0, 0])
-	difference() { 											
-		cylinder(h = floorHeight + pcbPositionZ, r1=5.5/2, r2 = 4.5/2);
-	}
+module pcbLeg() {		
+    cylinder(h = pcbLegHeight, r1=5/2, r2 = 4/2);
 }
 
-
-
-module top_pcbLeg() {		
-	translate([0, 0, 0])
-	difference() { 											
-		cylinder(h = height - floorHeight - pcbPositionZ - pcbHeight, r = 5.7/2);
-	}
+module batSep(){
+        cube([2*layerWidth, batteryLength-5, batteryD-5]);
 }
-
-module buttonFrame() {
-	translate([0, 0, -0.05])
-	cylinder(h=1.01, r1=buttonSize/2 + 0.5 + 1, r2=buttonSize/2 + 0.5);
-}
-
 
 //----------------------------------------------------------------------- FOO MODULES
 module cell(){
     color([0.5,0.2,0.2])
     rotate([90,0,0])
-    cylinder(batteryHeight, batteryRad, batteryRad, center=true);
+    cylinder(batteryLength, batteryRad, batteryRad);
 }
 
 module fullbox(){
-    color([0.2,0.5,0.2])
-    cube([boxWidth, boxLength, boxHeight], center=true);
+    color([0.2,0.2,0.8]) // TFT  blue
+    translate([-boxWidth/2,-boxLength/2,0])
+    cube([boxWidth, boxLength, tftHeight]);
+    color([0.2,0.5,0.2]) // PCB green
+    translate([-boxWidth/2,-boxLength/2.5,tftHeight])
+    cube([boxWidth, boxLength*2/3, boxHeight-tftHeight]);
 }
 
 
 module foo_internals1(){
-    rotate([0,0,90])
-    translate([0,0,floorHeight]){
-        translate([0,0,boxHeight/2])
+    rotate([0,0,0])
+    translate([0,0,floorHeight-tftSlotHeight]){
         fullbox();
-        translate([boxWidth/2+batteryRad,0,batteryRad])
+        translate([-boxWidth/2 +batteryRad-1*layerWidth, boxLength/2-8,boxHeight+batteryRad])
+        cell();
+        translate([boxWidth/2 -batteryRad-3*layerWidth, boxLength/2-8,boxHeight+batteryRad])
         cell();
 
-        translate([-boxWidth/2-batteryRad,0,batteryRad])
-        cell();
     }
 }
 
