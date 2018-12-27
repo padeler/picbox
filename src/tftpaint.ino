@@ -3,9 +3,7 @@
 // DOES NOT CURRENTLY WORK ON ARDUINO LEONARDO
 
 #include <SPI.h>
-
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_TFTLCD.h> // Hardware-specific library
+#include "tft/Adafruit_TFTLCD.h" // Hardware-specific library
 #include <TouchScreen.h>
 
 // next line for SD.h
@@ -102,7 +100,7 @@ void setup(void)
   // Serial.println(F("OK!"));
 
   // tft.fillScreen(BLACK);
-  bmpDraw("/woof.bmp");
+  // bmpDraw("/test.bmp");
 
   repaint = true;
 
@@ -125,7 +123,7 @@ void setup(void)
 
 void loop()
 {
-  // paint_loop();
+  paint_loop();
 }
 
 void paint_loop()
@@ -175,7 +173,7 @@ void paint_loop()
     {
       oldcolor = currentcolor;
       uint8_t m = p.x / BOXSIZE;
-      tft.drawRect(m * BOXSIZE, 0, BOXSIZE, BOXSIZE, WHITE);
+      // tft.drawRect(m * BOXSIZE, 0, BOXSIZE, BOXSIZE, WHITE);
       currentcolor = WHITE;
       if (p.x < BOXSIZE)
       {
