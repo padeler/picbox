@@ -102,7 +102,7 @@ void setup(void)
   // Serial.println(F("OK!"));
 
   // tft.fillScreen(BLACK);
-  // bmpDraw("/woof.bmp");
+  bmpDraw("/woof.bmp");
 
   repaint = true;
 
@@ -125,7 +125,7 @@ void setup(void)
 
 void loop()
 {
-  paint_loop();
+  // paint_loop();
 }
 
 void paint_loop()
@@ -232,37 +232,8 @@ void paint_loop()
   }
 }
 
-// This function opens a Windows Bitmap (BMP) file and
-// displays it at the given coordinates.  It's sped up
-// by reading many pixels worth of data at a time
-// (rather than pixel by pixel).  Increasing the buffer
-// size takes more of the Arduino's precious RAM but
-// makes loading a little faster.  20 pixels seems a
-// good balance.
-
 #define RGB_BUF_SIZE 48
 #define BMP_HEADER_LEN 34
-
-// These read 16- and 32-bit types from the SD card file.
-// BMP data is stored little-endian, Arduino is little-endian too.
-// May need to reverse subscript order if porting elsewhere.
-
-uint32_t readInt(File &f, uint8_t li = 2)
-{
-  uint32_t result = 0x00000000;
-  for (int i = 0; i < li; ++i)
-  {
-    ((uint8_t *)&result)[i] = f.read(); // LSB
-  }
-  // ((uint8_t *)&result)[0] = f.read(); // LSB
-  // ((uint8_t *)&result)[1] = f.read();
-  // if(li) // long int (32bit)
-  // {
-  //   ((uint8_t *)&result)[2] = f.read();
-  //   ((uint8_t *)&result)[3] = f.read(); // MSB
-  // }
-  return result;
-}
 
 bool read(File &f, uint8_t *buf, int len)
 {
@@ -276,9 +247,6 @@ bool read(File &f, uint8_t *buf, int len)
   return true;
 }
 
-#define read16(f) readInt(f, 2)
-#define read32(f) readInt(f, 4)
-
 void bmpDraw(char *filename)
 {
   File bmpFile = SD.open(filename);
@@ -288,24 +256,19 @@ void bmpDraw(char *filename)
     return;
   }
 
-  // Parse BMP header
-  if (read16(bmpFile) == 0x4D42)
-  { // BMP signature
-    // Serial.println(F("File size: ")); Serial.println();
-    read32(bmpFile);
-    (void)read32(bmpFile);                     // Read & ignore creator bytes
-    uint32_t bmpImageoffset = read32(bmpFile); // Start of image data
-    // Serial.print(F("Image Offset: ")); Serial.println(bmpImageoffset, DEC);
-    // Read DIB header
-    // Serial.print(F("Header size: ")); Serial.println();
-    read32(bmpFile);
-    uint32_t bmpWidth = read32(bmpFile);
-    uint32_t bmpHeight = read32(bmpFile);
-    // Serial.print(F("Bit Depth: ")); Serial.println(bmpDepth);
-    if (read16(bmpFile) == 1 &&    // planes ==1
-        (read16(bmpFile) == 24) && // depth == 24
-        (read32(bmpFile) == 0))    // 0 = uncompressed
+  uint8_t *rgb = (uint8_t*)malloc(RGB_BUF_SIZE);
+
+  // read full bmp header
+  if(read(bmpFile, rgb, BMP_HEADER_LEN))
+  {
+    if(*((uint16_t*)(rgb+0)) == 0x4D42 && // bmp signature
+      *((uint16_t*)(rgb+2+4+4+4+4+4+4)) == 1 && // planes==1
+      *((uint16_t*)(rgb+2+4+4+4+4+4+4+2)) == 24 && // depth==24
+      *((uint32_t*)(rgb+2+4+4+4+4+4+4+2+2)) == 0) // 0==uncompressed
     {
+      uint32_t bmpImageoffset = *((uint32_t*)(rgb+2+4+4)); // offset
+      uint32_t bmpWidth       = *((uint32_t*)(rgb+2+4+4+4+4)); // width
+      uint32_t bmpHeight      = *((uint32_t*)(rgb+2+4+4+4+4+4)); // height
 
       if (bmpHeight < 0)
       {
@@ -318,7 +281,6 @@ void bmpDraw(char *filename)
 
       // BMP rows are padded (if needed) to 4-byte boundary
       uint32_t padSize = ((bmpWidth * 3 + 3) & ~3)-3*bmpWidth;
-      uint8_t *rgb = (uint8_t*)malloc(RGB_BUF_SIZE);
 
       uint32_t pos = 0; 
       // // bmpFile.seek(bmpImageoffset);
@@ -328,8 +290,7 @@ void bmpDraw(char *filename)
         // read step bytes
         if(!read(bmpFile, rgb, step)) 
         {
-          free(rgb);
-          return;
+          break;
         }
         // convert inplace to 16bit pixels and send to TFT
         uint8_t j=0;
@@ -345,9 +306,9 @@ void bmpDraw(char *filename)
           bmpFile.seekCur(padSize);
         }
       }
-      free(rgb);
-    } 
+    }
   }
 
+  free(rgb);
   bmpFile.close();
 }
