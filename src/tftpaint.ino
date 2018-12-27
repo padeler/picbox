@@ -151,10 +151,23 @@ void paint_loop()
 
     if (repaint || p.y < (TS_MINY - 5))
     {
+      tft.fillRect(0, BOXSIZE, tft.width(), tft.height()-BOXSIZE, BLACK);
       // Serial.println("erase");
       // press the bottom of the screen to erase
-      bmpDraw("/woof.bmp");
-      // tft.fillRect(0, BOXSIZE, tft.width(), tft.height()-BOXSIZE, BLACK);
+      File bmpFile;
+      if(bmpFile.openNext(SD.vwd(), O_READ))
+      {
+        if (bmpFile.isFile())
+        {
+          bmpDraw(bmpFile);
+        }
+
+      }
+      else{
+        SD.vwd()->rewind();
+      }
+
+      bmpFile.close();
       repaint = false;
     }
 
@@ -245,14 +258,8 @@ bool read(File &f, uint8_t *buf, int len)
   return true;
 }
 
-void bmpDraw(char *filename)
+void bmpDraw(File &bmpFile)
 {
-  File bmpFile = SD.open(filename);
-  if (!bmpFile.isFile())
-  {
-    // Serial.println(F("File not found"));
-    return;
-  }
 
   uint8_t *rgb = (uint8_t*)malloc(RGB_BUF_SIZE);
 
@@ -281,7 +288,7 @@ void bmpDraw(char *filename)
       uint32_t padSize = ((bmpWidth * 3 + 3) & ~3)-3*bmpWidth;
 
       uint32_t pos = 0; 
-      // // bmpFile.seek(bmpImageoffset);
+      bmpFile.seek(bmpImageoffset);
       while(pos<bmpWidth*bmpHeight)
       {
         uint8_t step = min((bmpWidth-pos%bmpWidth)*3, RGB_BUF_SIZE);
@@ -294,7 +301,7 @@ void bmpDraw(char *filename)
         uint8_t j=0;
         for(uint8_t i=0;i<step;i+=3)
         {
-          ((uint16_t*)rgb)[j] = tft.color565(rgb[i+0], rgb[i+1], rgb[i+2]);
+          ((uint16_t*)rgb)[j] = tft.color565(rgb[i+2], rgb[i+1], rgb[i+0]);
           j++;
         }
         tft.pushColors(((uint16_t*)rgb), j, pos==0);
@@ -308,5 +315,4 @@ void bmpDraw(char *filename)
   }
 
   free(rgb);
-  bmpFile.close();
 }
