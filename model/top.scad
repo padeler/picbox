@@ -76,11 +76,13 @@ module top(){
             // cut screen hole
             translate([boxPositionX, boxPositionY,0])
             {
-                translate([0, 0, -0.1])
+                // cut screen hole
+                translate([-tftWide/2, -tftLengthFull/2, -10])
                 linear_extrude(height = height, convexity = 10)
-                square([tftWide,tftLength],center=true);
-
-                translate([-tftWideFull/2, -tftLength/2 - tftPadBottom, floorHeight - tftSlotHeight])
+                square([tftWide, tftLength],center=false);
+                
+                // cut border depression
+                translate([-tftWideFull/2, -tftLengthFull/2 - tftPadBottom, floorHeight - tftSlotHeight])
                 linear_extrude(height = height, convexity = 10)
                 square([tftWideFull, tftLengthFull]);
             }

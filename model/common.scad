@@ -27,15 +27,15 @@ batteryRad = batteryD/2;
 batteryLength = 65;
 
 // tft+pcb+arduino assemply
-boxLength=80;
+boxLength=78.3;
 boxWidth=55;
 boxHeight=19; // total height of the assemply
-tftHeight=7.2; 
+tftHeight=7.2; // tft shield height 
 
 pcbLegHeight = batteryD + boxHeight +tftSlotHeight - tftHeight ;
 
 boxPositionX = 0;
-boxPositionY = 10; // offset towards top
+boxPositionY = 8.7+1.8; // offset towards top
 
 powerHoleHeight = 5 + 13.5;
 powerHoleWidth = 19;
@@ -119,7 +119,7 @@ module cell(){
 }
 
 module fullbox(){
-    color([0.2,0.2,0.8]) // TFT  blue
+    color([0.2,0.2,0.8]) // TFT Shield  blue
     translate([-boxWidth/2,-boxLength/2,0])
     cube([boxWidth, boxLength, tftHeight]);
     color([0.2,0.5,0.2]) // PCB green
