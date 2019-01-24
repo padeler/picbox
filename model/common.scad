@@ -108,7 +108,11 @@ module pcbLeg() {
 }
 
 module batSep(){
-        cube([2*layerWidth, batteryLength-5, batteryD-5]);
+        cube([2*layerWidth, batteryLength-5, batteryD*2/3]);
+        translate([layerWidth,0,0])
+        rotate([0,-90,-90])
+        linear_extrude(height = batteryLength-5, convexity = 10)
+        polygon([[0,-batteryD/4],[0,batteryD/4],[batteryD/4,0]]);
 }
 
 //----------------------------------------------------------------------- FOO MODULES
@@ -139,4 +143,7 @@ module foo_internals1(){
 
     }
 }
+
+
+//batSep();
 
