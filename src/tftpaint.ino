@@ -104,16 +104,7 @@ void setup(void)
 
   repaint = true;
 
-  // tft.fillRect(0, 0, BOXSIZE, BOXSIZE, RED);
-  // tft.fillRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, YELLOW);
-  // tft.fillRect(BOXSIZE*2, 0, BOXSIZE, BOXSIZE, GREEN);
-  // tft.fillRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, CYAN);
-  // tft.fillRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, BLUE);
-  // tft.fillRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, MAGENTA);
-  // tft.fillRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
 
-  // tft.drawRect(0, 0, BOXSIZE, BOXSIZE, WHITE);
-  currentcolor = RED;
 
   pinMode(13, OUTPUT);
 }
@@ -124,6 +115,22 @@ void setup(void)
 void loop()
 {
   paint_loop();
+}
+
+void paint_buttons(uint8_t selected)
+{
+  tft.fillRect(0, 0, BOXSIZE, BOXSIZE, RED);
+  tft.fillRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, YELLOW);
+  tft.fillRect(BOXSIZE*2, 0, BOXSIZE, BOXSIZE, GREEN);
+  tft.fillRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, CYAN);
+  tft.fillRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, BLUE);
+  tft.fillRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, MAGENTA);
+  tft.fillRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
+
+  tft.drawFastHLine(BOXSIZE*selected, 0, BOXSIZE, WHITE);
+  tft.drawFastHLine(BOXSIZE*selected, BOXSIZE-1, BOXSIZE, WHITE);
+
+  // tft.fillRect(0, tft.height()-3, tft.width(), 3, WHITE);
 }
 
 void paint_loop()
@@ -168,6 +175,10 @@ void paint_loop()
       }
 
       bmpFile.close();
+
+      currentcolor = RED;
+      paint_buttons(0);
+
       repaint = false;
     }
 
@@ -186,59 +197,36 @@ void paint_loop()
     {
       oldcolor = currentcolor;
       uint8_t m = p.x / BOXSIZE;
-      // tft.drawRect(m * BOXSIZE, 0, BOXSIZE, BOXSIZE, WHITE);
-      currentcolor = WHITE;
-      if (p.x < BOXSIZE)
-      {
-        currentcolor = RED;
-        //  tft.drawRect(0, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
-      else if (p.x < BOXSIZE * 2)
-      {
-        currentcolor = YELLOW;
-        //  tft.drawRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
-      else if (p.x < BOXSIZE * 3)
-      {
-        currentcolor = GREEN;
-        //  tft.drawRect(BOXSIZE*2, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
-      else if (p.x < BOXSIZE * 4)
-      {
-        currentcolor = CYAN;
-        //  tft.drawRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
-      else if (p.x < BOXSIZE * 5)
-      {
-        currentcolor = BLUE;
-        //  tft.drawRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
-      else if (p.x < BOXSIZE * 6)
-      {
-        currentcolor = MAGENTA;
-        //  tft.drawRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, WHITE);
-      }
+      paint_buttons(m);
 
-      if (oldcolor != currentcolor)
+      switch(m)
       {
-        if (oldcolor == RED)
-          tft.fillRect(0, 0, BOXSIZE, BOXSIZE, RED);
-        if (oldcolor == YELLOW)
-          tft.fillRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, YELLOW);
-        if (oldcolor == GREEN)
-          tft.fillRect(BOXSIZE * 2, 0, BOXSIZE, BOXSIZE, GREEN);
-        if (oldcolor == CYAN)
-          tft.fillRect(BOXSIZE * 3, 0, BOXSIZE, BOXSIZE, CYAN);
-        if (oldcolor == BLUE)
-          tft.fillRect(BOXSIZE * 4, 0, BOXSIZE, BOXSIZE, BLUE);
-        if (oldcolor == MAGENTA)
-          tft.fillRect(BOXSIZE * 5, 0, BOXSIZE, BOXSIZE, MAGENTA);
+        case 0:
+          currentcolor = RED;
+          break;
+        case 1:
+          currentcolor = YELLOW;
+          break;
+        case 2:
+          currentcolor = GREEN;
+          break;
+        case 3:
+          currentcolor = CYAN;
+          break;
+        case 4:
+          currentcolor = BLUE;
+          break;
+        case 5:
+          currentcolor = MAGENTA;
+          break;
+        default:
+          currentcolor = WHITE;
       }
     }
     if (((p.y - PENRADIUS) > BOXSIZE) && ((p.y + PENRADIUS) < tft.height()))
-    {
-      tft.drawPixel(p.x, p.y, currentcolor);
-      // tft.fillCircle(p.x, p.y, PENRADIUS, currentcolor);
+    { // paint
+      // tft.drawPixel(p.x, p.y, currentcolor);
+      tft.fillRect(p.x, p.y, 3, 3, currentcolor);
     }
   }
 }
