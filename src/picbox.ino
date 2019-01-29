@@ -50,13 +50,25 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define MAGENTA 0xF81F
 #define YELLOW 0xFFE0
 #define WHITE 0xFFFF
+#define B1 0xAAAA
+#define B2 0xBBBB
+#define B3 0xCCCC
+
 
 Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 #define BOXSIZE 40
 #define PENRADIUS 3
+
+#define ALBUM "/album"
 uint16_t oldcolor, currentcolor;
+uint16_t total_images;
+
+uint16_t current_image;
+
+File album;
 bool repaint;
+
 
 void setup(void)
 {
@@ -103,9 +115,13 @@ void setup(void)
   // bmpDraw("/test.bmp");
 
   repaint = true;
+  if(!(album = SD.open(ALBUM)))
+  {
+    return; // failed to open album folder
+  }
 
-
-
+  total_images = count_files(&album);
+  current_image = random(total_images);
   pinMode(13, OUTPUT);
 }
 
@@ -117,15 +133,61 @@ void loop()
   paint_loop();
 }
 
+uint16_t count_files(File *dir)
+{
+  dir->rewind();
+  uint16_t res=0;
+  File f;
+  while(f.openNext(dir, O_READ))
+  {
+    if (f.isFile())
+    {
+      res++;
+    }
+    f.close();
+  }
+  return res;
+}
+
+File open_file(File *dir, uint16_t index)
+{
+  uint16_t pos = 0;
+  dir->rewind();
+  File res;
+  while(pos<=index && res.openNext(dir, O_READ)) 
+  {
+    if(res.isFile())
+    {
+      if(pos==index){
+        return res;
+      }
+      pos++;
+    }
+    res.close();
+  }
+}
+
+
 void paint_buttons(uint8_t selected)
 {
-  tft.fillRect(0, 0, BOXSIZE, BOXSIZE, RED);
-  tft.fillRect(BOXSIZE, 0, BOXSIZE, BOXSIZE, YELLOW);
-  tft.fillRect(BOXSIZE*2, 0, BOXSIZE, BOXSIZE, GREEN);
-  tft.fillRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, CYAN);
-  tft.fillRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, BLUE);
-  tft.fillRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, MAGENTA);
-  tft.fillRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
+
+  // top buttons
+  tft.fillRect(0         + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
+  tft.fillRect(BOXSIZE*2 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B2);
+  tft.fillRect(BOXSIZE*3 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B3);
+  tft.fillRect(BOXSIZE*5 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
+
+
+  // bottom buttons
+  tft.fillRect(0         + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, RED);
+  tft.fillRect(BOXSIZE   + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, YELLOW);
+  tft.fillRect(BOXSIZE*2 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, GREEN);
+  tft.fillRect(BOXSIZE*3 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, CYAN);
+  tft.fillRect(BOXSIZE*4 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, BLUE);
+  tft.fillRect(BOXSIZE*5 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, MAGENTA);
+  // tft.fillRect(BOXSIZE*6 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, WHITE);
+  tft.drawFastHLine(0, 0, tft.width(), BLACK);
+  tft.drawFastHLine(0, BOXSIZE-1, tft.width(), BLACK);
 
   tft.drawFastHLine(BOXSIZE*selected, 0, BOXSIZE, WHITE);
   tft.drawFastHLine(BOXSIZE*selected, BOXSIZE-1, BOXSIZE, WHITE);
@@ -135,6 +197,25 @@ void paint_buttons(uint8_t selected)
 
 void paint_loop()
 {
+  if (repaint)
+  {
+    // XXX No need to clear screen if all album images are qvga
+    // tft.fillRect(0, BOXSIZE, tft.width(), tft.height()-BOXSIZE, BLACK);
+
+    File bmpFile = open_file(&album, current_image);
+    if (bmpFile.isFile())
+    {
+      bmpDraw(bmpFile);
+    }
+
+    bmpFile.close();
+
+    currentcolor = RED;
+    paint_buttons(0);
+
+    repaint = false;
+  }
+
   digitalWrite(13, HIGH);
   TSPoint p = ts.getPoint();
   digitalWrite(13, LOW);
@@ -148,45 +229,46 @@ void paint_loop()
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
 
-  if (repaint || (p.z > MINPRESSURE && p.z < MAXPRESSURE))
+  if(p.z > MINPRESSURE && p.z < MAXPRESSURE)
   {
-    /*
-    Serial.print("X = "); Serial.print(p.x);
-    Serial.print("\tY = "); Serial.print(p.y);
-    Serial.print("\tPressure = "); Serial.println(p.z);
-    */
-
-    if (repaint || p.y < (TS_MINY - 5))
-    {
-      tft.fillRect(0, BOXSIZE, tft.width(), tft.height()-BOXSIZE, BLACK);
-      // Serial.println("erase");
-      // press the bottom of the screen to erase
-      File bmpFile;
-      if(bmpFile.openNext(SD.vwd(), O_READ))
-      {
-        if (bmpFile.isFile())
-        {
-          bmpDraw(bmpFile);
-        }
-
-      }
-      else{
-        SD.vwd()->rewind();
-      }
-
-      bmpFile.close();
-
-      currentcolor = RED;
-      paint_buttons(0);
-
-      repaint = false;
-    }
-
     // // scale from 0->1023 to tft.width
     p.x = map(p.x, TS_MINX, TS_MAXX, tft.width(), 0);
     p.y = map(p.y, TS_MINY, TS_MAXY, tft.height(), 0);
 
-    p.x = tft.width() - p.x;
+
+    // PPP These offsets on X and Y are needed due to wrong TS_MIN and TS_MAX values 
+    // but i am too lazy to find the correct values. 
+    // These offsets will work for my screen. 
+    p.x = tft.width() - p.x + 10;
+    p.y -= 15;
+
+    if(p.y>tft.height()-BOXSIZE)
+    { // top buttons
+      uint8_t m = p.x / BOXSIZE;
+      switch(m)
+      {
+        case 0: // right button 
+          current_image = (current_image+1)%total_images;
+          repaint=true;
+          break;
+        case 1:
+          break;
+        case 2: //  button, repaint
+          repaint=true;
+          break;
+        case 3: //  , random image
+          current_image = random(total_images);
+          repaint=true;
+          break;
+        case 4:
+          break;
+        case 5: // left button
+          current_image>0?current_image = current_image-1:current_image=total_images-1;
+          repaint=true;
+          break;
+      }      
+    }
+
 
     // /*
     // Serial.print("("); Serial.print(p.x);
@@ -226,7 +308,7 @@ void paint_loop()
     if (((p.y - PENRADIUS) > BOXSIZE) && ((p.y + PENRADIUS) < tft.height()))
     { // paint
       // tft.drawPixel(p.x, p.y, currentcolor);
-      tft.fillRect(p.x, p.y, 3, 3, currentcolor);
+      tft.fillRect(p.x, p.y, PENRADIUS, PENRADIUS, currentcolor);
     }
   }
 }
