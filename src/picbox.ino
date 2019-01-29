@@ -74,6 +74,7 @@ void setup(void)
 {
   // Serial.begin(9600);
   // Serial.println(F("Paint!"));
+  randomSeed(analogRead(0));
 
   tft.reset();
 
