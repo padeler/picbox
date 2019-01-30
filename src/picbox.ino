@@ -57,7 +57,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
-#define BOXSIZE 40
+#define BOXSIZE 34
 #define PENRADIUS 3
 
 #define ALBUM "/album"
@@ -77,6 +77,7 @@ void setup(void)
   randomSeed(analogRead(0));
 
   tft.reset();
+
 
   uint16_t identifier = tft.readID();
 
@@ -176,7 +177,7 @@ void paint_buttons(uint8_t selected)
   tft.fillRect(0         + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
   tft.fillRect(BOXSIZE*2 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B2);
   tft.fillRect(BOXSIZE*3 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B3);
-  tft.fillRect(BOXSIZE*5 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
+  tft.fillRect(BOXSIZE*6 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
 
 
   // bottom buttons
@@ -186,7 +187,7 @@ void paint_buttons(uint8_t selected)
   tft.fillRect(BOXSIZE*3 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, CYAN);
   tft.fillRect(BOXSIZE*4 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, BLUE);
   tft.fillRect(BOXSIZE*5 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, MAGENTA);
-  // tft.fillRect(BOXSIZE*6 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, WHITE);
+  tft.fillRect(BOXSIZE*6 + BOXSIZE/4, 0 + BOXSIZE/4, BOXSIZE/2, BOXSIZE/2, WHITE);
   tft.drawFastHLine(0, 0, tft.width(), BLACK);
   tft.drawFastHLine(0, BOXSIZE-1, tft.width(), BLACK);
 
@@ -263,7 +264,7 @@ void paint_loop()
           break;
         case 4:
           break;
-        case 5: // left button
+        case 6: // left button
           current_image>0?current_image = current_image-1:current_image=total_images-1;
           repaint=true;
           break;
