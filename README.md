@@ -34,8 +34,8 @@ Toy case created with OpenSCAD and printed with PLA.
 
 ## Making-of Photos
 PCB, arduino and LCD+touchscreen+SDCard_reader shield. Front and back views
-![hw2](/photos/hw2.jpg){:height="50%" width="50%"}
-![hw](/photos/hw.jpg){:height="50%" width="50%"}
+![hw2](/photos/hw2.jpg)
+![hw](/photos/hw.jpg)
 In order to save space the arduino goes between the PCB and the LCD board.
 ![pack1](/photos/pack1.jpg)
 After soldering the arduino to the PCB. It is a bit messy but it was my first try using a PCB this way.
