@@ -50,9 +50,9 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define MAGENTA 0xF81F
 #define YELLOW 0xFFE0
 #define WHITE 0xFFFF
-#define B1 0xAAAA
-#define B2 0xBBBB
-#define B3 0xCCCC
+#define BC1 0xAAAA
+#define BC2 0xBBBB
+#define BC3 0xCCCC
 
 
 Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -72,14 +72,22 @@ bool repaint;
 
 void setup(void)
 {
+  // // initialize digital pin LED_BUILTIN as an output.
+  // pinMode(LED_BUILTIN, OUTPUT);
+  // digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  // delay(500);                       // wait for a second
+  // digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+
   // Serial.begin(9600);
-  // Serial.println(F("Paint!"));
+  // Serial.println(F("Starting Paint!"));
+  delay(1000);
+
   randomSeed(analogRead(0));
 
   tft.reset();
 
 
-  uint16_t identifier = tft.readID();
+  uint16_t identifier = 0x9341; //tft.readID();
 
   // if(identifier == 0x9325) {
   //   Serial.println(F("Found ILI9325 LCD driver"));
@@ -105,16 +113,17 @@ void setup(void)
 
   tft.begin(identifier);
 
+  tft.fillScreen(BLACK);
+
   // Serial.print(F("Initializing SD card..."));
   if (!SD.begin(SD_CS))
   {
     // Serial.println(F("failed!"));
     return;
   }
-  // Serial.println(F("OK!"));
+  // Serial.println(F("OK!") );
 
-  // tft.fillScreen(BLACK);
-  // bmpDraw("/test.bmp");
+  // // bmpDraw("/test.bmp");
 
   repaint = true;
   if(!(album = SD.open(ALBUM)))
@@ -132,6 +141,8 @@ void setup(void)
 
 void loop()
 {
+  // Serial.println(F("Paint!"));
+  // delay(500);
   paint_loop();
 }
 
@@ -174,10 +185,10 @@ void paint_buttons(uint8_t selected)
 {
 
   // top buttons
-  tft.fillRect(0         + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
-  tft.fillRect(BOXSIZE*2 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B2);
-  tft.fillRect(BOXSIZE*3 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B3);
-  tft.fillRect(BOXSIZE*6 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, B1);
+  tft.fillRect(0         + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, BC1);
+  tft.fillRect(BOXSIZE*2 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, BC2);
+  tft.fillRect(BOXSIZE*3 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, BC3);
+  tft.fillRect(BOXSIZE*6 + BOXSIZE/4, tft.height() - BOXSIZE/2, BOXSIZE/2, BOXSIZE/4, BC1);
 
 
   // bottom buttons
@@ -259,6 +270,7 @@ void paint_loop()
           repaint=true;
           break;
         case 3: //  , random image
+          randomSeed(millis());
           current_image = random(total_images);
           repaint=true;
           break;
