@@ -3,7 +3,7 @@
 // DOES NOT CURRENTLY WORK ON ARDUINO LEONARDO
 
 #include <SPI.h>
-#include "tft/Adafruit_TFTLCD.h" // Hardware-specific library
+#include "src/tft/Adafruit_TFTLCD.h" // Hardware-specific library
 #include <TouchScreen.h>
 
 // next line for SD.h
@@ -22,10 +22,15 @@ SdFat SD;
 #define YM 9  // can be a digital pin
 #define XP 8  // can be a digital pin
 
-#define TS_MINX 150
-#define TS_MINY 120
-#define TS_MAXX 920
-#define TS_MAXY 940
+#define TS_MINX 248
+#define TS_MAXX 435
+#define TS_MINY 102
+#define TS_MAXY 900
+
+// (partial) fix for my broken touchscreen 
+#define TS_MINX2 150
+#define TS_MAXX2 550
+
 
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
@@ -69,6 +74,7 @@ uint16_t current_image;
 File album;
 bool repaint;
 
+bool seed_needed = true;
 
 void setup(void)
 {
@@ -78,14 +84,10 @@ void setup(void)
   // delay(500);                       // wait for a second
   // digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
 
-  // Serial.begin(9600);
-  // Serial.println(F("Starting Paint!"));
-  delay(1000);
-
-  randomSeed(analogRead(0));
+  Serial.begin(9600);
+  Serial.println(F("Starting Paint!"));
 
   tft.reset();
-
 
   uint16_t identifier = 0x9341; //tft.readID();
 
@@ -132,7 +134,7 @@ void setup(void)
   }
 
   total_images = count_files(&album);
-  current_image = random(total_images);
+  current_image = 0; //random(total_images);
   pinMode(13, OUTPUT);
 }
 
@@ -141,8 +143,7 @@ void setup(void)
 
 void loop()
 {
-  // Serial.println(F("Paint!"));
-  // delay(500);
+  // delay(100);
   paint_loop();
 }
 
@@ -233,6 +234,7 @@ void paint_loop()
   TSPoint p = ts.getPoint();
   digitalWrite(13, LOW);
 
+
   // if sharing pins, you'll need to fix the directions of the touchscreen pins
   //pinMode(XP, OUTPUT);
   pinMode(XM, OUTPUT);
@@ -244,16 +246,35 @@ void paint_loop()
 
   if(p.z > MINPRESSURE && p.z < MAXPRESSURE)
   {
-    // // scale from 0->1023 to tft.width
-    p.x = map(p.x, TS_MINX, TS_MAXX, tft.width(), 0);
-    p.y = map(p.y, TS_MINY, TS_MAXY, tft.height(), 0);
+    if(seed_needed)
+    {
+        randomSeed(p.x+p.y+p.z);
+        seed_needed=false;
+    }
+    Serial.print(F("RAW "));
+    Serial.print(p.x);Serial.print(" ");
+    Serial.print(p.y);Serial.print(" ");
 
+    p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+    p.y = constrain(p.y, 0 , tft.height());
 
-    // PPP These offsets on X and Y are needed due to wrong TS_MIN and TS_MAX values 
-    // but i am too lazy to find the correct values. 
-    // These offsets will work for my screen. 
-    p.x = tft.width() - p.x + 10;
-    p.y -= 15;
+    if(p.y<60 || p.y>230)
+    { // PPP Broken touch screen: On the edges use different mapping for p.x
+      p.x = map(p.x, TS_MINX2, TS_MAXX2, 0, tft.width());  
+    }
+    else
+    {
+      p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width());
+    }
+
+    p.x = constrain(p.x, 0 , tft.width());
+    
+    Serial.print(F("MAP "));
+    Serial.print(p.x);Serial.print(" ");
+    Serial.print(p.y);Serial.println(" ");
+
+    // y is inverted for some reason in the tft lib.
+    p.y = tft.height() - p.y; 
 
     if(p.y>tft.height()-BOXSIZE)
     { // top buttons
@@ -284,11 +305,6 @@ void paint_loop()
     }
 
 
-    // /*
-    // Serial.print("("); Serial.print(p.x);
-    // Serial.print(", "); Serial.print(p.y);
-    // Serial.println(")");
-    // */
     if (p.y < BOXSIZE)
     {
       oldcolor = currentcolor;
